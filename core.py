@@ -163,7 +163,8 @@ def get_house_percommunity(communityname):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.error(communityname+"percommunity page" +page + "Fail")
+            logging.info(communityname+"percommunity page" +page + "Fail")
+            continue
 
 def get_sell_percommunity(communityname):
     url = BASE_URL + u"chengjiao/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
@@ -233,7 +234,7 @@ def get_sell_percommunity(communityname):
 
                 except Exception as e:
                     logging.error(e)
-                    logging.error("name:" + name + "Fail")
+                    logging.info("name:" + name + "Fail")
                     continue
                 # Sellinfo insert into mysql
                 data_source.append(info_dict)
@@ -244,7 +245,7 @@ def get_sell_percommunity(communityname):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.error(communityname +"page:"+ page + "Fail")
+            logging.info(communityname +"page:"+ page + "Fail")
             continue
 
 def get_community_perregion(regionname=u'xicheng'):
@@ -319,7 +320,7 @@ def get_community_perregion(regionname=u'xicheng'):
             except Exception as e:
                 logging.error(e)
                 logging.info(regionname + "page:" + page + "Fail")
-                pass
+                continue
 
             # communityinfo insert into mysql
             #data_source.append(info_dict)
@@ -488,7 +489,7 @@ def get_house_perregion(district):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.error(district + "Houseinfo page:" + page + "Fail")
+            logging.info(district + "Houseinfo page:" + page + "Fail")
             continue
 
 def get_rent_perregion(district):
