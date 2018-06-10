@@ -156,11 +156,14 @@ def get_house_percommunity(communityname):
             hisprice_data_source.append({"houseID":info_dict["houseID"], "totalPrice":info_dict["totalPrice"]})
             #model.Houseinfo.insert(**info_dict).upsert().execute()
             #model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
-
-        with model.database.atomic():
-            model.Houseinfo.insert_many(data_source).upsert().execute()
-            model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
-        time.sleep(1)
+        try:
+            with model.database.atomic():
+                model.Houseinfo.insert_many(data_source).upsert().execute()
+                model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.error(communityname+"percommunity page" +page + "Fail")
 
 def get_sell_percommunity(communityname):
     url = BASE_URL + u"chengjiao/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
@@ -227,18 +230,26 @@ def get_sell_percommunity(communityname):
                     dealDate= name.find("div", {"class":"dealDate"})
                     info_dict.update({u'dealdate':dealDate.get_text().strip().replace('.','-')})
 
-                except:
+
+                except Exception as e:
+                    logging.error(e)
+                    logging.error("name:" + name + "Fail")
                     continue
                 # Sellinfo insert into mysql
                 data_source.append(info_dict)
                 #model.Sellinfo.insert(**info_dict).upsert().execute()
-
-        with model.database.atomic():
-            model.Sellinfo.insert_many(data_source).upsert().execute()
-        time.sleep(1)
+        try:
+            with model.database.atomic():
+                model.Sellinfo.insert_many(data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.error(communityname +"page:"+ page + "Fail")
+            continue
 
 def get_community_perregion(regionname=u'xicheng'):
     url = BASE_URL + u"xiaoqu/" + regionname +"/"
+    print(url)
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
@@ -285,7 +296,7 @@ def get_community_perregion(regionname=u'xicheng'):
                 onrent = name.find("a", {"title":title+u"租房"})
                 info_dict.update({u'onrent':onrent.get_text().strip('\n').split(u'套')[0]})
 
-                info_dict.update({u'id':name.get('data-housecode')})
+                info_dict.update({u'id':str(name.get('data-housecode'))})
 
                 price = name.find("div", {"class":"totalPrice"})
                 info_dict.update({u'price':price.span.get_text().strip('\n')})
@@ -295,15 +306,32 @@ def get_community_perregion(regionname=u'xicheng'):
                 for key, value in communityinfo.iteritems():
                     info_dict.update({key:value})
 
-            except:
-                continue
-            # communityinfo insert into mysql
-            data_source.append(info_dict)
-            #model.Community.insert(**info_dict).upsert().execute()
 
-        with model.database.atomic():
-            model.Community.insert_many(data_source).upsert().execute()
-        time.sleep(1)
+            except Exception as e:
+                logging.error(e)
+                logging.info("page:"+ page + "name:" + name + "Fail")
+                continue
+
+            try:
+                with model.database.atomic():
+                    model.Community.insert(info_dict).upsert().execute()
+                time.sleep(1)
+            except Exception as e:
+                logging.error(e)
+                logging.info(regionname + "page:" + page + "Fail")
+                pass
+
+            # communityinfo insert into mysql
+            #data_source.append(info_dict)
+            #model.Community.insert(**info_dict).upsert().execute()
+        '''try:
+            with model.database.atomic():
+                model.Community.insert_many(data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.info(regionname +"page:"+ page + "Fail")
+            pass'''
 
 def get_rent_percommunity(communityname):
     url = BASE_URL + u"zufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
@@ -375,10 +403,14 @@ def get_rent_percommunity(communityname):
                 # Rentinfo insert into mysql
                 data_source.append(info_dict)
                 #model.Rentinfo.insert(**info_dict).upsert().execute()
-
-        with model.database.atomic():
-            model.Rentinfo.insert_many(data_source).upsert().execute()
-        time.sleep(1)
+        try:
+            with model.database.atomic():
+                model.Rentinfo.insert_many(data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.info(communityname +"Rentinfo age:"+ page + "Fail")
+            continue
 
 def get_house_perregion(district):
     url = BASE_URL + u"ershoufang/%s/" % district
@@ -449,11 +481,15 @@ def get_house_perregion(district):
                 hisprice_data_source.append({"houseID":info_dict["houseID"], "totalPrice":info_dict["totalPrice"]})
                 #model.Houseinfo.insert(**info_dict).upsert().execute()
                 #model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
-
-        with model.database.atomic():
-            model.Houseinfo.insert_many(data_source).upsert().execute()
-            model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
-        time.sleep(1)
+        try:
+            with model.database.atomic():
+                model.Houseinfo.insert_many(data_source).upsert().execute()
+                model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.error(district + "Houseinfo page:" + page + "Fail")
+            continue
 
 def get_rent_perregion(district):
     url = BASE_URL + u"zufang/%s/" % district
@@ -526,10 +562,14 @@ def get_rent_perregion(district):
                 # Rentinfo insert into mysql
                 data_source.append(info_dict)
                 #model.Rentinfo.insert(**info_dict).upsert().execute()
-
-        with model.database.atomic():
-            model.Rentinfo.insert_many(data_source).upsert().execute()
-        time.sleep(1)
+        try:
+            with model.database.atomic():
+                model.Rentinfo.insert_many(data_source).upsert().execute()
+            time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.info(district + "Rentinfo age:" + page + "Fail")
+            continue
 
 def get_communityinfo_by_url(url):
     source_code = misc.get_source_code(url)
@@ -542,13 +582,13 @@ def get_communityinfo_by_url(url):
     res = {}
     for info in communityinfos:
         key_type = {
-        u"建筑年代": "year",
-        u"建筑类型": "housetype",
-        u"物业费用": "cost",
-        u"物业公司": "service",
-        u"开发商": "company",
-        u"楼栋总数": "building_num",
-        u"房屋总数": "house_num",
+        u"建筑年代": u"year",
+        u"建筑类型": u"housetype",
+        u"物业费用": u"cost",
+        u"物业公司": u"service",
+        u"开发商": u"company",
+        u"楼栋总数": u"building_num",
+        u"房屋总数": u"house_num",
         }
         try:
             key = info.find("span",{"xiaoquInfoLabel"})
