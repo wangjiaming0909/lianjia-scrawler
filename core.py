@@ -12,12 +12,14 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=lo
 BASE_URL = u"http://%s.lianjia.com/" % (settings.CITY)
 CITY = settings.CITY
 
-def GetHouseByCommunitylist(communitylist):
+#=============================Public========================================================
+
+def GetHouseByCommunitylist(communitylist, _page = None):
     logging.info("Get House Infomation")
     starttime = datetime.datetime.now()
     for community in communitylist:
         try:
-            get_house_percommunity(community)
+            get_house_percommunity(community, _page)
         except Exception as e:
             logging.error(e)
             logging.error(community + "Fail")
@@ -25,12 +27,12 @@ def GetHouseByCommunitylist(communitylist):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-def GetSellByCommunitylist(communitylist):
+def GetSellByCommunitylist(communitylist, _page = None):
     logging.info("Get Sell Infomation")
     starttime = datetime.datetime.now()
     for community in communitylist:
         try:
-            get_sell_percommunity(community)
+            get_sell_percommunity(community, _page)
         except Exception as e:
             logging.error(e)
             logging.error(community + "Fail")
@@ -38,12 +40,12 @@ def GetSellByCommunitylist(communitylist):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-def GetRentByCommunitylist(communitylist):
+def GetRentByCommunitylist(communitylist, _page = None):
     logging.info("Get Rent Infomation")
     starttime = datetime.datetime.now()
     for community in communitylist:
         try:
-            get_rent_percommunity(community)
+            get_rent_percommunity(community, _page)
         except Exception as e:
             logging.error(e)
             logging.error(community + "Fail")
@@ -65,38 +67,43 @@ def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-def GetHouseByRegionlist(regionlist=[u'xicheng']):
+def GetHouseByRegionlist(regionlist=[u'xicheng'], _page = None):
     starttime = datetime.datetime.now()
     for regionname in regionlist:
         logging.info("Get Onsale House Infomation in %s" % regionname)
         try:
-            get_house_perregion(regionname)
+            get_house_perregion(regionname, _page)
         except Exception as e:
             logging.error(e)
             pass
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-def GetRentByRegionlist(regionlist=[u'xicheng']):
+def GetRentByRegionlist(regionlist=[u'xicheng'], _page = None):
     starttime = datetime.datetime.now()
     for regionname in regionlist:
         logging.info("Get Rent House Infomation in %s" % regionname)
         try:
-            get_rent_perregion(regionname)
+            get_rent_perregion(regionname, _page)
         except Exception as e:
             logging.error(e)
             pass
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-def get_house_percommunity(communityname):
+#=====================Private=============================================================================
+
+def get_house_percommunity(communityname, _page = None):
     url = BASE_URL + u"ershoufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
     if check_block(soup):
         return
-    total_pages = misc.get_total_pages(url)
+
+    total_pages = _page
+    if total_pages == None:
+        total_pages = misc.get_total_pages(url)
     
     if total_pages == None:
         row = model.Houseinfo.select().count()
@@ -166,14 +173,18 @@ def get_house_percommunity(communityname):
             logging.info(communityname+"percommunity page" +page + "Fail")
             continue
 
-def get_sell_percommunity(communityname):
+def get_sell_percommunity(communityname, _page = None):
     url = BASE_URL + u"chengjiao/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
     if check_block(soup):
         return
-    total_pages = misc.get_total_pages(url)
+
+    total_pages = _page 
+    
+    if total_pages == None:
+        total_pages = misc.get_total_pages(url)
     
     if total_pages == None:
         row = model.Sellinfo.select().count()
@@ -334,14 +345,16 @@ def get_community_perregion(regionname=u'xicheng'):
             logging.info(regionname +"page:"+ page + "Fail")
             pass'''
 
-def get_rent_percommunity(communityname):
+def get_rent_percommunity(communityname, _page = None):
     url = BASE_URL + u"zufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
     if check_block(soup):
         return
-    total_pages = misc.get_total_pages(url)
+    total_pages = _page
+    if total_pages == None:
+        total_pages = misc.get_total_pages(url)
 
     if total_pages == None:
         row = model.Rentinfo.select().count()
@@ -413,13 +426,16 @@ def get_rent_percommunity(communityname):
             logging.info(communityname +"Rentinfo age:"+ page + "Fail")
             continue
 
-def get_house_perregion(district):
+def get_house_perregion(district, _page = None):
     url = BASE_URL + u"ershoufang/%s/" % district
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
     if check_block(soup):
         return
-    total_pages = misc.get_total_pages(url)
+    total_pages = _page
+    if total_pages == None:
+        total_pages = misc.get_total_pages(url)
+
     if total_pages == None:
         row = model.Houseinfo.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
@@ -492,13 +508,15 @@ def get_house_perregion(district):
             logging.info(district + "Houseinfo page:" + page + "Fail")
             continue
 
-def get_rent_perregion(district):
+def get_rent_perregion(district, _page = None):
     url = BASE_URL + u"zufang/%s/" % district
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
     if check_block(soup):
         return
-    total_pages = misc.get_total_pages(url)
+    total_pages =  _page
+    if total_pages == None:   
+        total_pages = misc.get_total_pages(url)
     if total_pages == None:
         row = model.Rentinfo.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)

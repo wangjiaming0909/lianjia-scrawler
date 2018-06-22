@@ -32,13 +32,16 @@ def get_totalpage(url):
 		page = 1
 	return page
 
-def GetSellByCommunitylist():
+def GetSellByCommunitylist(_page = None):
+	pages = _page
 	with open('community_id.txt') as f:
 	    for line in f.readlines():
 	    	data_source = []
 	    	code = line.split(' ')[0]
 	    	communityinfo = line.split(' ')[1]
-	    	pages = get_totalpage("https://bj.5i5j.com/sold/%s" % code)
+    		if pages == None:	
+	    	    pages = get_totalpage("https://bj.5i5j.com/sold/%s" % code)
+
 	    	for page in range(1,pages+1):
 		    	source_code = misc.get_source_code("https://bj.5i5j.com/sold/%s/n%d/" % (code,page))
 		    	soup = BeautifulSoup(source_code, 'lxml')
@@ -83,11 +86,10 @@ def GetSellByCommunitylist():
 		    		info_dict.update({u'unitPrice':unitPrice })
 		    		info_dict.update({u'dealdate':dealdate })
 		    		data_source.append(info_dict)
-
-	        with model.database.atomic():
+            with model.database.atomic():
 	        	try:
 	        		model.Sellinfo.insert_many(data_source).upsert().execute()
 	        	except:
 	        		pass
-	        logging.info("%s finish" % communityinfo)
-	        time.sleep(1)
+            logging.info("%s finish" % communityinfo)
+            time.sleep(1)
