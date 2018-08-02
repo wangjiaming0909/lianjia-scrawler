@@ -40,6 +40,20 @@ def GetSellByCommunitylist(communitylist, _page = None):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
+
+def GetSellByHouselist(Houselist):
+    logging.info("Get Sell Infomation by houseIDList")
+    starttime = datetime.datetime.now()
+    for house in Houselist:
+        try:
+            get_sell_perhouseID(house)
+        except Exception as e:
+            logging.error(e)
+            logging.error(house + "Fail")
+            pass
+    endtime = datetime.datetime.now()
+    logging.info("Run time: " + str(endtime - starttime))
+
 def GetRentByCommunitylist(communitylist, _page = None):
     logging.info("Get Rent Infomation")
     starttime = datetime.datetime.now()
@@ -258,6 +272,45 @@ def get_sell_percommunity(communityname, _page = None):
             logging.error(e)
             logging.info(communityname +"page:"+ page + "Fail")
             continue
+
+def get_sell_perhouseID(houseID):
+    url_page = BASE_URL + u"chengjiao/" + houseID+ ".html"
+    source_code = misc.get_source_code(url_page)
+    soup = BeautifulSoup(source_code, 'lxml')
+    log_progress("GetSellByHouseID", houseID,1,1)
+    info_dict = {}
+    for name in soup.findAll("ul", {"class":"record_list"}):
+
+        try:
+            totalPrice = name.find("span", {"class":"record_price"})
+            if totalPrice.span is None:
+                totalPrice = totalPrice.get_text().strip().split(u'万')
+            else:
+                totalPrice = totalPrice.span.get_text().strip().split(u'万')
+
+            info_dict.update({u'totalPrice':totalPrice[0]})
+
+            detail = name.find("p", {"class":"record_detail"}).get_text().split(',')
+            info_dict.update({u'unitPrice':detail[0].replace(u'单价','').replace(u'元/平','')})
+            info_dict.update({u'dealdate':detail[2].replace('.','-')})
+        except Exception as e:
+            logging.error(e)
+            logging.info("name:" + name + "Fail")
+            continue
+        #model.Sellinfo.insert(**info_dict).upsert().execute()
+    try:
+        with model.database.atomic():
+            '''update_house = model.Monthsellinfo.select().where(Monthsellinfo.houseID == houseID)
+            update_house = model.Monthsellinfo.select().where(Monthsellinfo.houseID == houseID).get()
+            update_house.totalPrice = info_dict[u'totalPrice']
+            update_house.unitPrice = info_dict[u'unitPrice']
+            update_house.dealdate = info_dict[u'dealdate']
+            update_house.save()'''
+            model.Monthsellinfo.update(totalPrice = info_dict[u'totalPrice'], unitPrice = info_dict[u'unitPrice'],dealdate=info_dict[u'dealdate']).where(model.Monthsellinfo.houseID == houseID).execute()
+        time.sleep(1)
+    except Exception as e:
+        logging.error(e)
+        logging.info(houseID + "house info Fail")     
 
 def get_community_perregion(regionname=u'xicheng'):
     url = BASE_URL + u"xiaoqu/" + regionname +"/"

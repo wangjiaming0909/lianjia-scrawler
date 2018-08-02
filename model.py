@@ -68,6 +68,7 @@ class Houseinfo(BaseModel):
 	unitPrice 	= CharField()
 	followInfo 	= CharField()
 	decoration 	= CharField()
+	isSold      = CharField(default='no')
 	validdate 	= DateTimeField(default=datetime.datetime.now)
 
 class Hisprice(BaseModel):
@@ -79,6 +80,23 @@ class Hisprice(BaseModel):
 		primary_key = CompositeKey('houseID', 'totalPrice')
 
 class Sellinfo(BaseModel):
+	houseID 	= CharField(primary_key=True)
+	title 		= CharField()
+	link 		= CharField()
+	community 	= CharField()
+	years 		= CharField()
+	housetype 	= CharField()
+	square 		= CharField()
+	direction 	= CharField()
+	floor 		= CharField()
+	status 		= CharField()
+	source 		= CharField()
+	totalPrice 	= CharField()
+	unitPrice 	= CharField()
+	dealdate 	= CharField(null=True)
+	updatedate 	= DateTimeField(default=datetime.datetime.now)
+
+class Monthsellinfo(BaseModel):
 	houseID 	= CharField(primary_key=True)
 	title 		= CharField()
 	link 		= CharField()
@@ -112,5 +130,5 @@ class Rentinfo(BaseModel):
 
 def database_init():
     database.connect()
-    database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Rentinfo], safe=True)
+    database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True)
     database.close()
