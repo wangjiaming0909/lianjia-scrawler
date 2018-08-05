@@ -68,8 +68,8 @@ class Houseinfo(BaseModel):
 	unitPrice 	= CharField()
 	followInfo 	= CharField()
 	decoration 	= CharField()
-	isSold      = CharField(default='no')
 	validdate 	= DateTimeField(default=datetime.datetime.now)
+	isSold      = CharField(default='no')
 
 class Hisprice(BaseModel):
 	houseID 	= CharField()
