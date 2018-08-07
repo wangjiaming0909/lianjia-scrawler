@@ -17,7 +17,11 @@ CITY = settings.CITY
 def GetHouseByCommunitylist(communitylist, _page = None):
     logging.info("Get House Infomation")
     starttime = datetime.datetime.now()
+    community_len = str(len(communitylist))
+    i_status = 1
     for community in communitylist:
+        logging.info("communitylist: " + str(i_status)+"/"+community_len)
+        i_status = i_status+1
         try:
             get_house_percommunity(community, _page)
         except Exception as e:
@@ -30,7 +34,11 @@ def GetHouseByCommunitylist(communitylist, _page = None):
 def GetSellByCommunitylist(communitylist, _page = None):
     logging.info("Get Sell Infomation")
     starttime = datetime.datetime.now()
+    community_len = str(len(communitylist))
+    i_status = 1
     for community in communitylist:
+        logging.info("communitylist: " + str(i_status)+"/"+community_len)
+        i_status = i_status+1
         try:
             get_sell_percommunity(community, _page)
         except Exception as e:
@@ -41,10 +49,14 @@ def GetSellByCommunitylist(communitylist, _page = None):
     logging.info("Run time: " + str(endtime - starttime))
 
 
-def GetSellByHouselist(Houselist):
+def GetSellByHouselist(houselist):
     logging.info("Get Sell Infomation by houseIDList")
+    houselist_len = str(len(houselist))
+    i_status = 1
     starttime = datetime.datetime.now()
-    for house in Houselist:
+    for house in houselist:
+        logging.info("houselist: " + str(i_status)+"/"+houselist_len)
+        i_status = i_status+1
         try:
             get_sell_perhouseID(house)
         except Exception as e:
@@ -57,7 +69,11 @@ def GetSellByHouselist(Houselist):
 def GetRentByCommunitylist(communitylist, _page = None):
     logging.info("Get Rent Infomation")
     starttime = datetime.datetime.now()
+    community_len = str(len(communitylist))
+    i_status = 1
     for community in communitylist:
+        logging.info("communitylist: " + str(i_status)+"/"+community_len)
+        i_status = i_status+1
         try:
             get_rent_percommunity(community, _page)
         except Exception as e:
@@ -70,7 +86,11 @@ def GetRentByCommunitylist(communitylist, _page = None):
 def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     logging.info("Get Community Infomation")
     starttime = datetime.datetime.now()
+    regionlist_len = str(len(regionlist))
+    i_status = 1
     for regionname in regionlist:
+        logging.info("regionlist: " + str(i_status)+"/"+regionlist_len)
+        i_status = i_status+1
         try:
             get_community_perregion(regionname)
             logging.info(regionname + "Done")
@@ -83,8 +103,12 @@ def GetCommunityByRegionlist(regionlist=[u'xicheng']):
 
 def GetHouseByRegionlist(regionlist=[u'xicheng'], _page = None):
     starttime = datetime.datetime.now()
+    regionlist_len = str(len(regionlist))
+    i_status = 1
     for regionname in regionlist:
         logging.info("Get Onsale House Infomation in %s" % regionname)
+        logging.info("regionlist: " + str(i_status)+"/"+regionlist_len)
+        i_status = i_status+1
         try:
             get_house_perregion(regionname, _page)
         except Exception as e:
@@ -95,10 +119,14 @@ def GetHouseByRegionlist(regionlist=[u'xicheng'], _page = None):
 
 def GetRentByRegionlist(regionlist=[u'xicheng'], _page = None):
     starttime = datetime.datetime.now()
+    regionlist_len = str(len(regionlist))
+    i_status = 1
     for regionname in regionlist:
+        logging.info("regionlist: " + str(i_status)+"/"+regionlist_len)
         logging.info("Get Rent House Infomation in %s" % regionname)
+        i_status = i_status+1
         try:
-            get_rent_perregion(regionname, _page)
+            get_rent_perregion(regionname, _page)          
         except Exception as e:
             logging.error(e)
             pass
@@ -297,11 +325,9 @@ def get_sell_perhouseID(houseID):
             logging.error(e)
             logging.info("name:" + name + "Fail")
             continue
-        #model.Sellinfo.insert(**info_dict).upsert().execute()
     try:
         with model.database.atomic():
-            '''update_house = model.Monthsellinfo.select().where(Monthsellinfo.houseID == houseID)
-            update_house = model.Monthsellinfo.select().where(Monthsellinfo.houseID == houseID).get()
+            '''update_house = model.Monthsellinfo.select().where(Monthsellinfo.houseID == houseID).get()
             update_house.totalPrice = info_dict[u'totalPrice']
             update_house.unitPrice = info_dict[u'unitPrice']
             update_house.dealdate = info_dict[u'dealdate']
