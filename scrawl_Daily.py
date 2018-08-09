@@ -11,7 +11,7 @@ def get_communitylist():
 	return res
 def get_soldHouseList():
     res = []
-    for house in model.Monthsellinfo.select():
+    for house in model.Monthsellinfo.select().where(model.Monthsellinfo.dealdate.contains(u'30天')):
         res.append(house.houseID)
     return res
 
