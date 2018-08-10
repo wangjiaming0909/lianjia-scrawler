@@ -450,7 +450,7 @@ def get_community_percustom(community=u''):
     soup = BeautifulSoup(source_code, 'lxml')
     nameList = soup.findAll("li", {"class":"clear"})
     i = 0
-    log_progress("GetCommunityByRegionlist", regionname, page+1, total_pages)
+    log_progress("GetCommunityByRegionlist", community, 1, 1)
     data_source = []
     for name in nameList: # Per house loop
         i = i + 1
@@ -490,7 +490,7 @@ def get_community_percustom(community=u''):
 
         except Exception as e:
             logging.error(e)
-            logging.info("page:"+ page + "name:" + name + "Fail")
+            logging.info("page:1" + "name:" + name + "Fail")
             continue
 
         try:
@@ -499,7 +499,7 @@ def get_community_percustom(community=u''):
                 time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(community + "page:" + page + "Fail")
+            logging.info(community + "page:1" + "Fail")
             continue
 
 		# communityinfo insert into mysql
