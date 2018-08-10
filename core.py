@@ -442,8 +442,9 @@ def get_community_perregion(regionname=u'xicheng'):
             logging.error(e)
             logging.info(regionname +"page:"+ page + "Fail")
             pass'''
+	
 def get_community_percustom(community=u''):
-    url = BASE_URL + u"xiaoqu/" + regionname +"/"
+    url = BASE_URL + u"xiaoqu/" + community +"/"
     print(url)
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
@@ -498,7 +499,7 @@ def get_community_percustom(community=u''):
                 time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(regionname + "page:" + page + "Fail")
+            logging.info(community + "page:" + page + "Fail")
             continue
 
 		# communityinfo insert into mysql
