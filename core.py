@@ -101,6 +101,25 @@ def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
+	def GetCommunityByCustomlist(regionlist=[u'']):
+    logging.info("Get Community Infomation")
+    starttime = datetime.datetime.now()
+    regionlist_len = str(len(regionlist))
+    i_status = 1
+    for regionname in regionlist:
+        logging.info("regionlist: " + str(i_status)+"/"+regionlist_len)
+        i_status = i_status+1
+        try:
+            get_community_perregion(regionname)
+            logging.info(regionname + "Done")
+        except Exception as e:
+            logging.error(e)
+            logging.error(regionname + "Fail")
+            pass
+    endtime = datetime.datetime.now()
+    logging.info("Run time: " + str(endtime - starttime))
+
+	
 def GetHouseByRegionlist(regionlist=[u'xicheng'], _page = None):
     starttime = datetime.datetime.now()
     regionlist_len = str(len(regionlist))
