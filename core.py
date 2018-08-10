@@ -444,7 +444,7 @@ def get_community_perregion(regionname=u'xicheng'):
             pass'''
 	
 def get_community_percustom(community=u''):
-    url = BASE_URL + u"xiaoqu/" + community +"/"
+    url = BASE_URL + u"xiaoqu/rs" + urllib2.quote(community.encode('utf8')) +"/"
     print(url)
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
