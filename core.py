@@ -101,23 +101,23 @@ def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
-	def GetCommunityByCustomlist(regionlist=[u'']):
-    logging.info("Get Community Infomation")
-    starttime = datetime.datetime.now()
-    regionlist_len = str(len(regionlist))
-    i_status = 1
-    for regionname in regionlist:
-        logging.info("regionlist: " + str(i_status)+"/"+regionlist_len)
-        i_status = i_status+1
-        try:
-            get_community_perregion(regionname)
-            logging.info(regionname + "Done")
-        except Exception as e:
-            logging.error(e)
-            logging.error(regionname + "Fail")
-            pass
-    endtime = datetime.datetime.now()
-    logging.info("Run time: " + str(endtime - starttime))
+def GetCommunityByCustomlist(customlist=[u'']):
+	logging.info("Get Community Infomation")
+	starttime = datetime.datetime.now()
+	customlist_len = str(len(customlist))
+	i_status = 1
+	for customCommunity in customlist:
+		logging.info("customlist: " + str(i_status)+"/"+customlist_len)
+		i_status = i_status+1
+		try:
+			get_community_percustom(customCommunity)
+			logging.info(customCommunity + "Done")
+		except Exception as e:
+			logging.error(e)
+			logging.error(customCommunity + "Fail")
+			pass
+	endtime = datetime.datetime.now()
+	logging.info("Run time: " + str(endtime - starttime))
 
 	
 def GetHouseByRegionlist(regionlist=[u'xicheng'], _page = None):
@@ -442,6 +442,76 @@ def get_community_perregion(regionname=u'xicheng'):
             logging.error(e)
             logging.info(regionname +"page:"+ page + "Fail")
             pass'''
+def get_community_percustom(community=u''):
+    url = BASE_URL + u"xiaoqu/" + regionname +"/"
+    print(url)
+    source_code = misc.get_source_code(url)
+    soup = BeautifulSoup(source_code, 'lxml')
+    nameList = soup.findAll("li", {"class":"clear"})
+    i = 0
+    log_progress("GetCommunityByRegionlist", regionname, page+1, total_pages)
+    data_source = []
+    for name in nameList: # Per house loop
+        i = i + 1
+        info_dict = {}
+        try:
+            communitytitle = name.find("div", {"class":"title"})
+            title = communitytitle.get_text().strip('\n')
+            link = communitytitle.a.get('href')
+            info_dict.update({u'title':title})
+            info_dict.update({u'link':link})
+
+            district = name.find("a", {"class":"district"})
+            info_dict.update({u'district':district.get_text()})
+
+            bizcircle = name.find("a", {"class":"bizcircle"})
+            info_dict.update({u'bizcircle':bizcircle.get_text()})
+
+            tagList = name.find("div", {"class":"tagList"})
+            info_dict.update({u'tagList':tagList.get_text().strip('\n')})
+
+            onsale = name.find("a", {"class":"totalSellCount"})
+            info_dict.update({u'onsale':onsale.span.get_text().strip('\n')})
+
+            onrent = name.find("a", {"title":title+u"租房"})
+            info_dict.update({u'onrent':onrent.get_text().strip('\n').split(u'套')[0]})
+
+            info_dict.update({u'id':str(name.get('data-housecode'))})
+
+            price = name.find("div", {"class":"totalPrice"})
+            info_dict.update({u'price':price.span.get_text().strip('\n')})
+
+
+            communityinfo = get_communityinfo_by_url(link)
+            for key, value in communityinfo.iteritems():
+                info_dict.update({key:value})
+
+
+        except Exception as e:
+            logging.error(e)
+            logging.info("page:"+ page + "name:" + name + "Fail")
+            continue
+
+        try:
+            with model.database.atomic():
+                model.Community.insert(info_dict).upsert().execute()
+                time.sleep(1)
+        except Exception as e:
+            logging.error(e)
+            logging.info(regionname + "page:" + page + "Fail")
+            continue
+
+		# communityinfo insert into mysql
+		#data_source.append(info_dict)
+		#model.Community.insert(**info_dict).upsert().execute()
+	'''try:
+		with model.database.atomic():
+			model.Community.insert_many(data_source).upsert().execute()
+		time.sleep(1)
+	except Exception as e:
+		logging.error(e)
+		logging.info(regionname +"page:"+ page + "Fail")
+		pass'''
 
 def get_rent_percommunity(communityname, _page = None):
     url = BASE_URL + u"zufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
