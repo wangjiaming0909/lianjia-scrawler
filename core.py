@@ -339,7 +339,7 @@ def get_sell_perhouseID(houseID):
 
             detail = name.find("p", {"class":"record_detail"}).get_text().split(',')
             info_dict.update({u'unitPrice':detail[0].replace(u'单价','').replace(u'元/平','')})
-            info_dict.update({u'dealdate':detail[2].replace('.','-')})
+            info_dict.update({u'dealdate':detail[1].replace('.','-')})
         except Exception as e:
             logging.error(e)
             logging.info("name:" + name + "Fail")
