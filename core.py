@@ -162,7 +162,7 @@ def GetRentByRegionlist(regionlist=[u'xicheng'], _page=None):
 # =====================Private=============================================================================
 
 def get_house_percommunity(communityname, _page=None):
-    url = BASE_URL + u"ershoufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
+    url = BASE_URL + u"ershoufang/rs" + urllib3.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
@@ -179,7 +179,7 @@ def get_house_percommunity(communityname, _page=None):
 
     for page in range(total_pages):
         if page > 0:
-            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib2.quote(communityname.encode('utf8')))
+            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib3.quote(communityname.encode('utf8')))
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
 
@@ -243,7 +243,7 @@ def get_house_percommunity(communityname, _page=None):
 
 
 def get_sell_percommunity(communityname, _page=None):
-    url = BASE_URL + u"chengjiao/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
+    url = BASE_URL + u"chengjiao/rs" + urllib3.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
@@ -424,7 +424,7 @@ def get_community_perregion(regionname=u'xicheng'):
                 info_dict.update({u'price': price.span.get_text().strip('\n')})
 
                 communityinfo = get_communityinfo_by_url(link)
-                for key, value in communityinfo.iteritems():
+                for key, value in communityinfo.items():
                     info_dict.update({key: value})
 
 
@@ -495,7 +495,7 @@ def get_community_percustom(community=u''):
             info_dict.update({u'price': price.span.get_text().strip('\n')})
 
             communityinfo = get_communityinfo_by_url(link)
-            for key, value in communityinfo.iteritems():
+            for key, value in communityinfo.items():
                 info_dict.update({key: value})
 
 
@@ -643,25 +643,28 @@ def get_house_perregion(district, _page=None):
                     info_dict.update({u'houseID': houseID})
 
                     houseinfo = name.find("div", {"class": "houseInfo"})
-                    if CITY == 'bj':
-                        info = houseinfo.get_text().split('/')
-                    else:
-                        info = houseinfo.get_text().split('|')
-                    info_dict.update({u'community': info[0]})
-                    info_dict.update({u'housetype': info[1]})
-                    info_dict.update({u'square': info[2]})
-                    info_dict.update({u'direction': info[3]})
-                    info_dict.update({u'decoration': info[4]})
+                    # if CITY == 'bj':
+                    #     info = houseinfo.get_text().split('/')
+                    # else:
+                    info = houseinfo.get_text().split('|')
+                    # info_dict.update({u'structure': info[0]})//拿到的数据是几居室的信息而不是社区的信息
+                    # info_dict.update({u'community': info[0]})
+                    info_dict.update({u'square': info[1]})
+                    info_dict.update({u'direction': info[2]})
+                    info_dict.update({u'decoration': info[3]})
+                    info_dict.update({u'floor': info[4]})
+                    info_dict.update({u'years': info[5]})
+                    info_dict.update({u'housetype': info[6]})
 
-                    housefloor = name.find("div", {"class": "positionInfo"})
-                    info_dict.update({u'years': housefloor.get_text().strip()})
-                    info_dict.update({u'floor': housefloor.get_text().strip()})
+                    # housefloor = name.find("div", {"class": "positionInfo"})
+                    # info_dict.update({u'years': housefloor.get_text().strip()})
+                    # info_dict.update({u'floor': housefloor.get_text().strip()})
 
                     followInfo = name.find("div", {"class": "followInfo"})
                     info_dict.update({u'followInfo': followInfo.get_text().strip()})
 
                     taxfree = name.find("span", {"class": "taxfree"})
-                    if taxfree == None:
+                    if taxfree is None:
                         info_dict.update({u"taxtype": ""})
                     else:
                         info_dict.update({u"taxtype": taxfree.get_text().strip()})
@@ -671,7 +674,8 @@ def get_house_perregion(district, _page=None):
 
                     unitPrice = name.find("div", {"class": "unitPrice"})
                     info_dict.update({u'unitPrice': unitPrice.get("data-price")})
-                except:
+                except Exception as e:
+                    print(e)
                     continue
 
                 # Houseinfo insert into mysql
