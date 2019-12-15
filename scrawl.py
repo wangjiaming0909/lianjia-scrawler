@@ -20,7 +20,7 @@ def get_custom_communitylist():
 if __name__ == "__main__":
     pages = settings.PAGES
     regionlist = settings.REGIONLIST  # only pinyin support
-    # model.database_init()
+    model.database_init()
     # core.GetHouseByRegionlist(regionlist, pages)
     # core.GetRentByRegionlist(regionlist, pages)
     

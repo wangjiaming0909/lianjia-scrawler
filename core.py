@@ -21,7 +21,7 @@ def GetHouseByCommunitylist(communitylist, _page=None):
     community_len = str(len(communitylist))
     i_status = 1
     for community in communitylist:
-        logging.info("communitylist: " + str(i_status) + "/" + community_len)
+        logging.info("communitylist: " + community + " " + str(i_status) + "/" + community_len)
         i_status = i_status + 1
         try:
             get_house_percommunity(community, _page)
@@ -169,23 +169,35 @@ def get_house_percommunity(communityname, _page=None):
     if check_block(soup):
         return
 
+    # if no result is showed
+    noResult = soup.find('div', {'class': 'm-noresult'})
+    if noResult is not None:
+        return None
+
     total_pages = _page
-    if total_pages == None:
+    if total_pages is None:
         total_pages = misc.get_total_pages(url)
 
-    if total_pages == None:
-        row = model.Houseinfo.select().count()
-        raise RuntimeError("Finish at %s because total_pages is None" % row)
+    logging.info('total pages: ' + str(total_pages))
+    if total_pages is None:
+        return
+        # row = model.Houseinfo.select().count()
+        # raise RuntimeError("Finish at %s because total_pages is None" % row)
 
     for page in range(total_pages):
         if page > 0:
-            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib2.quote(communityname.encode('utf8')))
+            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page+1, urllib2.quote(communityname.encode('utf8')))
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
 
-        nameList = soup.findAll("li", {"class": "clear"})
+        def hasIdAttr(css_class):
+            return css_class == 'clear'
+
+        nameList = soup.findAll('li', class_=hasIdAttr)
+        # nameList = contentSoup.findAll("li", {"class": "clear"})
         i = 0
         log_progress("GetHouseByCommunitylist", communityname, page + 1, total_pages)
+        logging.info(str(len(nameList)) + ' houses in page ' + str(page + 1))
         data_source = []
         hisprice_data_source = []
         for name in nameList:  # per house loop
@@ -208,7 +220,7 @@ def get_house_percommunity(communityname, _page=None):
                 info_dict.update({u'decoration': info[3].strip()})
                 info_dict.update({u'floor': info[4].strip()})
                 info_dict.update({u'years': info[5].strip()})
-                
+
                 # not suitable to new html structure be careful
                 '''
                 housefloor = name.find("div", {"class": "flood"})
@@ -234,10 +246,10 @@ def get_house_percommunity(communityname, _page=None):
             # houseinfo insert into mysql
             data_source.append(info_dict)
             hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-            
+
             # model.Houseinfo.insert(**info_dict).execute()
             # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).execute()
-        
+
         try:
             with model.database.atomic():
                 model.Houseinfo.insert_many(data_source).execute()
@@ -332,7 +344,7 @@ def get_sell_percommunity(communityname, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(communityname + "page:" + page + "Fail")
+            logging.info(communityname + "page:" + str(page) + "Fail")
             continue
 
 
@@ -437,7 +449,7 @@ def get_community_perregion(regionname=u'xicheng'):
 
             except Exception as e:
                 logging.error(e)
-                logging.info("page:" + page + "name:" + name + "Fail")
+                logging.info("page:" + str(page) + "name:" + name + "Fail")
                 continue
 
             try:
@@ -611,7 +623,7 @@ def get_rent_percommunity(communityname, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(communityname + "Rentinfo age:" + page + "Fail")
+            logging.info(communityname + "Rentinfo age:" + str(page) + "Fail")
             continue
 
 
@@ -697,7 +709,7 @@ def get_house_perregion(district, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(district + "Houseinfo page:" + page + "Fail")
+            logging.info(district + "Houseinfo page:" + str(page) + "Fail")
             continue
 
 
@@ -780,7 +792,7 @@ def get_rent_perregion(district, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(district + "Rentinfo age:" + page + "Fail")
+            logging.info(district + "Rentinfo age:" + str(page) + "Fail")
             continue
 
 
