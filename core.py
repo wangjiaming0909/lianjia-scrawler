@@ -15,7 +15,7 @@ CITY = settings.CITY
 
 # =============================Public========================================================
 
-def GetHouseByCommunitylist(communitylist, _page=None):
+def GetHouseByCommunitylist(communitylist=["东菜园小区"], _page=None):
     logging.info("Get House Infomation")
     starttime = datetime.datetime.now()
     community_len = str(len(communitylist))
@@ -162,6 +162,7 @@ def GetRentByRegionlist(regionlist=[u'xicheng'], _page=None):
 # =====================Private=============================================================================
 
 def get_house_percommunity(communityname, _page=None):
+    communityname = "东菜园小区"
     url = BASE_URL + u"ershoufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
@@ -179,7 +180,7 @@ def get_house_percommunity(communityname, _page=None):
 
     for page in range(total_pages):
         if page > 0:
-            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib2.quote(communityname.encode('utf8')))
+            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page+1, urllib2.quote(communityname.encode('utf8')))
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
 
@@ -192,6 +193,11 @@ def get_house_percommunity(communityname, _page=None):
             i = i + 1
             info_dict = {}
             try:
+                position = name.find("div", {"class": "positionInfo"})
+                exact_community = position.a.get_text().strip()
+                if(exact_community != communityname):
+                    continue
+
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
                 info_dict.update({u'link': housetitle.a.get('href')})
@@ -201,6 +207,7 @@ def get_house_percommunity(communityname, _page=None):
                     info = houseaddr.div.get_text().split('|')
                 else:
                     info = houseaddr.div.get_text().split('|')
+
                 info_dict.update({u'community': communityname})
                 info_dict.update({u'housetype': info[0].strip()})
                 info_dict.update({u'square': info[1].strip()})

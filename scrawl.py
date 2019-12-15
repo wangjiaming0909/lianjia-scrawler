@@ -28,8 +28,8 @@ if __name__ == "__main__":
     # core.GetCommunityByCustomlist(custom_l)
 
     # core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
-    communitylist = get_communitylist()  # Read celllist from database
-
+    # communitylist = get_communitylist()  # Read celllist from database
+    communitylist = ["东菜园小区"]
     core.GetHouseByCommunitylist(communitylist, pages)
     core.GetSellByCommunitylist(communitylist, pages)
 
