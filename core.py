@@ -245,7 +245,7 @@ def get_house_percommunity(communityname, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(communityname + "percommunity page" + page + "Fail")
+            logging.info(communityname + "percommunity page" + str(page) + "Fail")
             continue
 
 
@@ -446,7 +446,7 @@ def get_community_perregion(regionname=u'xicheng'):
                 time.sleep(1)
             except Exception as e:
                 logging.error(e)
-                logging.info(regionname + "page:" + page + "Fail")
+                logging.info(regionname + "page:" + str(page) + "Fail")
                 continue
 
             # communityinfo insert into mysql
