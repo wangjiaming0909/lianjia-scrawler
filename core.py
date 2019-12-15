@@ -210,7 +210,7 @@ def get_house_percommunity(communityname, _page=None):
                 if("小区" not in communityname and "社区" not in communityname):
                     if(exact_community != communityname):
                         logging.info(communityname + "search failed! please check")
-                        return None
+                        break
 
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
