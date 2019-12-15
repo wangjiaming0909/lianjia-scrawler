@@ -194,6 +194,7 @@ def get_house_percommunity(communityname, _page=None):
             return css_class == 'clear'
 
         nameList = soup.findAll('li', class_=hasIdAttr)
+
         # nameList = contentSoup.findAll("li", {"class": "clear"})
         i = 0
         log_progress("GetHouseByCommunitylist", communityname, page + 1, total_pages)
@@ -204,6 +205,13 @@ def get_house_percommunity(communityname, _page=None):
             i = i + 1
             info_dict = {}
             try:
+                position = name.find("div", {"class": "positionInfo"})
+                exact_community = position.a.get_text().strip()
+                if("小区" not in communityname and "社区" not in communityname):
+                    if(exact_community != communityname):
+                        logging.info(communityname + "search failed! please check")
+                        break
+
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
                 info_dict.update({u'link': housetitle.a.get('href')})
@@ -222,12 +230,6 @@ def get_house_percommunity(communityname, _page=None):
                 info_dict.update({u'years': info[5].strip()})
 
                 # not suitable to new html structure be careful
-                '''
-                housefloor = name.find("div", {"class": "flood"})
-                floor_all = housefloor.div.get_text().split('-')[0].strip().split(' ')
-                info_dict.update({u'floor': floor_all[0].strip()})
-                info_dict.update({u'years': floor_all[-1].strip()})
-                '''
 
                 followInfo = name.find("div", {"class": "followInfo"})
                 info_dict.update({u'followInfo': followInfo.get_text()})
