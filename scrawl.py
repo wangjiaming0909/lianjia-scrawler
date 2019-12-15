@@ -2,7 +2,7 @@
 import core
 import model
 import settings
-import woaiwojialib
+#import woaiwojialib
 
 
 def get_communitylist():
@@ -20,14 +20,18 @@ def get_custom_communitylist():
 if __name__ == "__main__":
     pages = settings.PAGES
     regionlist = settings.REGIONLIST  # only pinyin support
-    model.database_init()
-    core.GetHouseByRegionlist(regionlist, pages)
-    core.GetRentByRegionlist(regionlist, pages)
-    core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
-    custom_l = get_custom_communitylist()
-    core.GetCommunityByCustomlist(custom_l)
+    # model.database_init()
+    # core.GetHouseByRegionlist(regionlist, pages)
+    # core.GetRentByRegionlist(regionlist, pages)
+    
+    # custom_l = get_custom_communitylist()
+    # core.GetCommunityByCustomlist(custom_l)
+
+    # core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
     communitylist = get_communitylist()  # Read celllist from database
+
     core.GetHouseByCommunitylist(communitylist, pages)
-    core.GetRentByCommunitylist(communitylist, pages)
     core.GetSellByCommunitylist(communitylist, pages)
+
+    # core.GetRentByCommunitylist(communitylist, pages)
     # woaiwojialib.GetSellByCommunitylist()

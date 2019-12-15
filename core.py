@@ -5,7 +5,7 @@ import model
 import misc
 import time
 import datetime
-import urllib3
+import urllib.request as urllib2
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -229,12 +229,14 @@ def get_house_percommunity(communityname, _page=None):
             # houseinfo insert into mysql
             data_source.append(info_dict)
             hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-            # model.Houseinfo.insert(**info_dict).upsert().execute()
-            # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
+            
+            # model.Houseinfo.insert(**info_dict).execute()
+            # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).execute()
+        
         try:
             with model.database.atomic():
-                model.Houseinfo.insert_many(data_source).upsert().execute()
-                model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
+                model.Houseinfo.insert_many(data_source).execute()
+                model.Hisprice.insert_many(hisprice_data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -318,10 +320,10 @@ def get_sell_percommunity(communityname, _page=None):
                     continue
                 # Sellinfo insert into mysql
                 data_source.append(info_dict)
-                # model.Sellinfo.insert(**info_dict).upsert().execute()
+                # model.Sellinfo.insert(**info_dict).execute()
         try:
             with model.database.atomic():
-                model.Sellinfo.insert_many(data_source).upsert().execute()
+                model.Sellinfo.insert_many(data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -424,7 +426,7 @@ def get_community_perregion(regionname=u'xicheng'):
                 info_dict.update({u'price': price.span.get_text().strip('\n')})
 
                 communityinfo = get_communityinfo_by_url(link)
-                for key, value in communityinfo.iteritems():
+                for key, value in communityinfo.items():
                     info_dict.update({key: value})
 
 
@@ -435,7 +437,7 @@ def get_community_perregion(regionname=u'xicheng'):
 
             try:
                 with model.database.atomic():
-                    model.Community.insert(info_dict).upsert().execute()
+                    model.Community.insert(info_dict).execute()
                 time.sleep(1)
             except Exception as e:
                 logging.error(e)
@@ -444,10 +446,10 @@ def get_community_perregion(regionname=u'xicheng'):
 
             # communityinfo insert into mysql
             # data_source.append(info_dict)
-            # model.Community.insert(**info_dict).upsert().execute()
+            # model.Community.insert(**info_dict).execute()
         '''try:
             with model.database.atomic():
-                model.Community.insert_many(data_source).upsert().execute()
+                model.Community.insert_many(data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -506,7 +508,7 @@ def get_community_percustom(community=u''):
 
         try:
             with model.database.atomic():
-                model.Community.insert(info_dict).upsert().execute()
+                model.Community.insert(info_dict).execute()
                 time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -515,10 +517,10 @@ def get_community_percustom(community=u''):
 
         # communityinfo insert into mysql
         # data_source.append(info_dict)
-        # model.Community.insert(**info_dict).upsert().execute()
+        # model.Community.insert(**info_dict).execute()
         '''try:
 		with model.database.atomic():
-			model.Community.insert_many(data_source).upsert().execute()
+			model.Community.insert_many(data_source).execute()
 		time.sleep(1)
 	except Exception as e:
 		logging.error(e)
@@ -597,10 +599,10 @@ def get_rent_percommunity(communityname, _page=None):
                     continue
                 # Rentinfo insert into mysql
                 data_source.append(info_dict)
-                # model.Rentinfo.insert(**info_dict).upsert().execute()
+                # model.Rentinfo.insert(**info_dict).execute()
         try:
             with model.database.atomic():
-                model.Rentinfo.insert_many(data_source).upsert().execute()
+                model.Rentinfo.insert_many(data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -677,12 +679,12 @@ def get_house_perregion(district, _page=None):
                 # Houseinfo insert into mysql
                 data_source.append(info_dict)
                 hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-                # model.Houseinfo.insert(**info_dict).upsert().execute()
-                # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
+                # model.Houseinfo.insert(**info_dict).execute()
+                # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).execute()
         try:
             with model.database.atomic():
-                model.Houseinfo.insert_many(data_source).upsert().execute()
-                model.Hisprice.insert_many(hisprice_data_source).upsert().execute()
+                model.Houseinfo.insert_many(data_source).execute()
+                model.Hisprice.insert_many(hisprice_data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
@@ -762,10 +764,10 @@ def get_rent_perregion(district, _page=None):
                     continue
                 # Rentinfo insert into mysql
                 data_source.append(info_dict)
-                # model.Rentinfo.insert(**info_dict).upsert().execute()
+                # model.Rentinfo.insert(**info_dict).execute()
         try:
             with model.database.atomic():
-                model.Rentinfo.insert_many(data_source).upsert().execute()
+                model.Rentinfo.insert_many(data_source).execute()
             time.sleep(1)
         except Exception as e:
             logging.error(e)
