@@ -162,7 +162,7 @@ def GetRentByRegionlist(regionlist=[u'xicheng'], _page=None):
 # =====================Private=============================================================================
 
 def get_house_percommunity(communityname, _page=None):
-    url = BASE_URL + u"ershoufang/rs" + urllib3.quote(communityname.encode('utf8')) + "/"
+    url = BASE_URL + u"ershoufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
@@ -179,7 +179,7 @@ def get_house_percommunity(communityname, _page=None):
 
     for page in range(total_pages):
         if page > 0:
-            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib3.quote(communityname.encode('utf8')))
+            url_page = BASE_URL + u"ershoufang/pg%drs%s/" % (page, urllib2.quote(communityname.encode('utf8')))
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
 
@@ -198,19 +198,24 @@ def get_house_percommunity(communityname, _page=None):
 
                 houseaddr = name.find("div", {"class": "address"})
                 if CITY == 'bj':
-                    info = houseaddr.div.get_text().split('/')
+                    info = houseaddr.div.get_text().split('|')
                 else:
                     info = houseaddr.div.get_text().split('|')
-                info_dict.update({u'community': info[0].strip()})
-                info_dict.update({u'housetype': info[1].strip()})
-                info_dict.update({u'square': info[2].strip()})
-                info_dict.update({u'direction': info[3].strip()})
-                info_dict.update({u'decoration': info[4].strip()})
-
+                info_dict.update({u'community': communityname})
+                info_dict.update({u'housetype': info[0].strip()})
+                info_dict.update({u'square': info[1].strip()})
+                info_dict.update({u'direction': info[2].strip()})
+                info_dict.update({u'decoration': info[3].strip()})
+                info_dict.update({u'floor': info[4].strip()})
+                info_dict.update({u'years': info[5].strip()})
+                
+                # not suitable to new html structure be careful
+                '''
                 housefloor = name.find("div", {"class": "flood"})
                 floor_all = housefloor.div.get_text().split('-')[0].strip().split(' ')
                 info_dict.update({u'floor': floor_all[0].strip()})
                 info_dict.update({u'years': floor_all[-1].strip()})
+                '''
 
                 followInfo = name.find("div", {"class": "followInfo"})
                 info_dict.update({u'followInfo': followInfo.get_text()})
@@ -245,7 +250,7 @@ def get_house_percommunity(communityname, _page=None):
 
 
 def get_sell_percommunity(communityname, _page=None):
-    url = BASE_URL + u"chengjiao/rs" + urllib3.quote(communityname.encode('utf8')) + "/"
+    url = BASE_URL + u"chengjiao/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
