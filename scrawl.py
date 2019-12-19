@@ -31,7 +31,7 @@ if __name__ == "__main__":
     communitylist = get_communitylist()  # Read celllist from database
 
     core.GetHouseByCommunitylist(communitylist, pages)
-    core.GetSellByCommunitylist(communitylist, pages)
+    #core.GetSellByCommunitylist(communitylist, pages)
 
     # core.GetRentByCommunitylist(communitylist, pages)
     # woaiwojialib.GetSellByCommunitylist()
