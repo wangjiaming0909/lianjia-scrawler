@@ -80,8 +80,7 @@ class Hisprice(BaseModel):
     date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
-        primary_key = CompositeKey('houseID', 'totalPrice')
-
+        primary_key = CompositeKey('houseID', 'totalPrice', 'date')
 
 class Sellinfo(BaseModel):
     houseID = CharField(primary_key=True)
@@ -138,4 +137,6 @@ class Rentinfo(BaseModel):
 def database_init():
     database.connect()
     database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True)
+    idx = Hisprice.index(Hisprice.houseID)
+    Hisprice.add_index(idx)
     database.close()

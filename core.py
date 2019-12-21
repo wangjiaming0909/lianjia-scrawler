@@ -210,7 +210,27 @@ def get_house_percommunity(communityname, _page=None):
                 if("小区" not in communityname and "社区" not in communityname):
                     if(exact_community != communityname):
                         logging.info(communityname + "search failed! please check")
-                        break
+                        continue
+
+                totalPrice = name.find("div", {"class": "totalPrice"})
+                totalPrice = totalPrice.span.get_text()
+                info_dict.update({u'totalPrice': totalPrice})
+
+                unitPrice = name.find("div", {"class": "unitPrice"})
+                hid = unitPrice.get('data-hid')
+                info_dict.update({u'houseID': hid})
+                info_dict.update({u'unitPrice': unitPrice.get('data-price')})
+
+                # find the latest totalprice, if the price is the same as the price we get this time, skip updating the hisprice
+                needUpdateHisPrice = True
+                maxDate = model.Hisprice.select(model.fn.MAX(model.Hisprice.date)).where(model.Hisprice.houseID == hid).scalar()
+                ret = model.Hisprice.get_or_none((model.Hisprice.houseID == hid) & (model.Hisprice.date == maxDate) & (model.Hisprice.totalPrice == totalPrice))
+
+                if ret is not None:
+                    print(ret.houseID, ' ', ret.date, ' ', ret.totalPrice, ' price not change, skipping...')
+                    needUpdateHisPrice = False
+                else:
+                    print(hid, ' new entry added...')
 
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
@@ -237,24 +257,20 @@ def get_house_percommunity(communityname, _page=None):
                 tax = name.find("div", {"class": "tag"})
                 info_dict.update({u'taxtype': tax.get_text().strip()})
 
-                totalPrice = name.find("div", {"class": "totalPrice"})
-                info_dict.update({u'totalPrice': totalPrice.span.get_text()})
-
-                unitPrice = name.find("div", {"class": "unitPrice"})
-                info_dict.update({u'unitPrice': unitPrice.get('data-price')})
-                info_dict.update({u'houseID': unitPrice.get('data-hid')})
-            except:
+            except Exception as e:
+                print(e)
                 continue
             # houseinfo insert into mysql
             data_source.append(info_dict)
-            hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
+            if needUpdateHisPrice:
+                hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
 
             # model.Houseinfo.insert(**info_dict).execute()
             # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).execute()
 
         try:
             with model.database.atomic():
-                model.Houseinfo.insert_many(data_source).execute()
+                model.Houseinfo.replace_many(data_source).execute()
                 model.Hisprice.insert_many(hisprice_data_source).execute()
             time.sleep(1)
         except Exception as e:
