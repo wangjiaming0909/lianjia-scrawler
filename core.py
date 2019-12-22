@@ -20,11 +20,11 @@ def GetHouseByCommunitylist(communitylist, _page=None):
     starttime = datetime.datetime.now()
     community_len = str(len(communitylist))
     i_status = 1
-    for community in communitylist:
+    for community, id in communitylist:
         logging.info("communitylist: " + community + " " + str(i_status) + "/" + community_len)
         i_status = i_status + 1
         try:
-            get_house_percommunity(community, _page)
+            get_house_percommunity(community, id, _page)
         except Exception as e:
             logging.error(e)
             logging.error(community + "Fail")
@@ -161,7 +161,7 @@ def GetRentByRegionlist(regionlist=[u'xicheng'], _page=None):
 
 # =====================Private=============================================================================
 
-def get_house_percommunity(communityname, _page=None):
+def get_house_percommunity(communityname, id, _page=None):
     url = BASE_URL + u"ershoufang/rs" + urllib2.quote(communityname.encode('utf8')) + "/"
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
@@ -207,10 +207,13 @@ def get_house_percommunity(communityname, _page=None):
             try:
                 position = name.find("div", {"class": "positionInfo"})
                 exact_community = position.a.get_text().strip()
-                if("小区" not in communityname and "社区" not in communityname):
-                    if(exact_community != communityname):
-                        logging.info(communityname + "search failed! please check")
-                        continue
+                if exact_community != communityname:
+                    logging.info('expected community: ' + communityname + ' actual: ' + exact_community)
+                    continue
+                #if("小区" not in communityname and "社区" not in communityname):
+                #    if(exact_community != communityname):
+                #        logging.info(communityname + "search failed! please check")
+                #        continue
 
                 totalPrice = name.find("div", {"class": "totalPrice"})
                 totalPrice = totalPrice.span.get_text()
@@ -241,7 +244,7 @@ def get_house_percommunity(communityname, _page=None):
                     info = houseaddr.div.get_text().split('|')
                 else:
                     info = houseaddr.div.get_text().split('|')
-                info_dict.update({u'community': communityname})
+                info_dict.update({u'communityID': id})
                 info_dict.update({u'housetype': info[0].strip()})
                 info_dict.update({u'square': info[1].strip()})
                 info_dict.update({u'direction': info[2].strip()})
@@ -275,7 +278,7 @@ def get_house_percommunity(communityname, _page=None):
             time.sleep(1)
         except Exception as e:
             logging.error(e)
-            logging.info(communityname + "percommunity page" + str(page) + "Fail")
+            logging.info(communityname + "percommunity page: " + str(page) + " Fail")
             continue
 
 
@@ -438,6 +441,7 @@ def get_community_perregion(regionname=u'xicheng'):
                 title = communitytitle.get_text().strip('\n')
                 link = communitytitle.a.get('href')
                 info_dict.update({u'title': title})
+                print(title)
                 info_dict.update({u'link': link})
 
                 district = name.find("a", {"class": "district"})
@@ -472,7 +476,7 @@ def get_community_perregion(regionname=u'xicheng'):
 
             try:
                 with model.database.atomic():
-                    model.Community.insert(info_dict).execute()
+                    model.Community.replace_many(info_dict).execute()
                 time.sleep(1)
             except Exception as e:
                 logging.error(e)

@@ -55,11 +55,22 @@ class Community(BaseModel):
     validdate = DateTimeField(default=datetime.datetime.now)
 
 
+def getAllMutableFields():
+    return [Houseinfo.title, Houseinfo.link,
+            Houseinfo.years, Houseinfo.housetype,
+            Houseinfo.taxtype,
+            Houseinfo.totalPrice, Houseinfo.unitPrice, Houseinfo.followInfo,
+            Houseinfo.decoration, Houseinfo.validdate, Houseinfo.isSold]
+
+def getAllUnmutableFieldsOfHouseInfo():
+    return [Houseinfo.houseID, Houseinfo.communityID]
+
+
 class Houseinfo(BaseModel):
     houseID = CharField(primary_key=True)
     title = CharField()
     link = CharField()
-    community = CharField()
+    communityID = CharField()
     years = CharField()
     housetype = CharField()
     square = CharField()
@@ -75,15 +86,17 @@ class Houseinfo(BaseModel):
 
 
 class Hisprice(BaseModel):
+    id = PrimaryKeyField()
     houseID = CharField()
     totalPrice = CharField()
-    date = DateTimeField(default=datetime.datetime.now)
+    date = DateField(default=datetime.datetime.now().date())
 
-    class Meta:
-        primary_key = CompositeKey('houseID', 'totalPrice', 'date')
+    # class Meta:
+    #     primary_key = CompositeKey('houseID', 'totalPrice', 'date')
+
 
 class Sellinfo(BaseModel):
-    houseID = CharField(primary_key=True)
+    houseID = ForeignKeyField(Houseinfo, Houseinfo.houseID, primary_key=True)
     title = CharField()
     link = CharField()
     community = CharField()
@@ -101,7 +114,7 @@ class Sellinfo(BaseModel):
 
 
 class Monthsellinfo(BaseModel):
-    houseID = CharField(primary_key=True)
+    houseID = ForeignKeyField(Houseinfo, Houseinfo.houseID, primary_key=True)
     title = CharField()
     link = CharField()
     community = CharField()
@@ -119,7 +132,7 @@ class Monthsellinfo(BaseModel):
 
 
 class Rentinfo(BaseModel):
-    houseID = CharField(primary_key=True)
+    houseID = ForeignKeyField(Houseinfo, Houseinfo.houseID, primary_key=True)
     title = CharField()
     link = CharField()
     region = CharField()
