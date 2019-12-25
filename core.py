@@ -232,7 +232,7 @@ def get_house_percommunity(communityname, id, _page=None):
                 else:
                     info = houseaddr.div.get_text().split('|')
 
-                info_dict.update({u'community': communityname})
+                info_dict.update({u'communityName': communityname})
                 info_dict.update({u'communityID': id})
                 info_dict.update({u'housetype': info[0].strip()})
                 info_dict.update({u'square': info[1].strip()})

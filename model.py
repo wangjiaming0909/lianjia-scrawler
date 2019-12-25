@@ -70,6 +70,7 @@ class Houseinfo(BaseModel):
     houseID = CharField(primary_key=True)
     title = CharField()
     link = CharField()
+    communityName = CharField()
     communityID = CharField()
     years = CharField()
     housetype = CharField()
@@ -149,5 +150,5 @@ class Rentinfo(BaseModel):
 
 def database_init():
     database.connect()
-    database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True)
+    # database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True) 
     database.close()
