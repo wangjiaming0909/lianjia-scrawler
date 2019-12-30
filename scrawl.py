@@ -28,11 +28,11 @@ if __name__ == "__main__":
     # custom_l = get_custom_communitylist()
     #core.GetCommunityByCustomlist(custom_l)
 
-    #core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
+    core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
     communitylist = get_communitylist()  # Read celllist from database
 
-    core.GetHouseByCommunitylist(communitylist, pages)
-    #core.GetSellByCommunitylist(communitylist, pages)
+    #core.GetHouseByCommunitylist(communitylist, pages)
+    # core.GetSellByCommunitylist(communitylist, pages)
 
     # core.GetRentByCommunitylist(communitylist, pages)
     # woaiwojialib.GetSellByCommunitylist()

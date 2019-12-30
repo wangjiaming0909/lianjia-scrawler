@@ -87,7 +87,6 @@ class Houseinfo(BaseModel):
 
 
 class Hisprice(BaseModel):
-    id = PrimaryKeyField()
     houseID = CharField()
     totalPrice = CharField()
     date = DateField(default=datetime.datetime.now().date())
@@ -150,5 +149,5 @@ class Rentinfo(BaseModel):
 
 def database_init():
     database.connect()
-    # database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True) 
+    database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True) 
     database.close()

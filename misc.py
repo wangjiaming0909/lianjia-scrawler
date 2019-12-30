@@ -35,8 +35,8 @@ hd = {
 
 def get_source_code(url):
     try:
-        #result = requests.get(url, headers=hds[random.randint(0,len(hds)-1)])
-        result = requests.get(url)
+        result = requests.get(url, headers=hds[random.randint(0,len(hds)-1)])
+        # result = requests.get(url)
         source_code = result.content
     except Exception as e:
         print (e)
@@ -147,7 +147,7 @@ def readurl_by_proxy(url):
         proxys.remove(tet)
         print('proxys remove by exception:')
         print (e)
-        print ('proxys new length is:' + str(len(proxys)))
+        print ('p(roxys new length is:' + str(len(proxys)))
         return None
 
     return source_code 

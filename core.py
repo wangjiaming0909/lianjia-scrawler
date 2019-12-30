@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from concurrent.futures.thread import ThreadPoolExecutor
+
 from bs4 import BeautifulSoup
 import settings
 import model
@@ -87,21 +89,23 @@ def GetRentByCommunitylist(communitylist, _page=None):
     logging.info("Run time: " + str(endtime - starttime))
 
 
+def loop(regionname):
+    # try:
+    get_community_perregion(regionname)
+    #     logging.info(regionname + "Done")
+    # except Exception as e:
+    #     logging.error(e)
+    #     logging.error(regionname + "Fail")
+    #     pass
+
+
 def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     logging.info("Get Community Infomation")
     starttime = datetime.datetime.now()
     regionlist_len = str(len(regionlist))
     i_status = 1
-    for regionname in regionlist:
-        logging.info("regionlist: " + str(i_status) + "/" + regionlist_len)
-        i_status = i_status + 1
-        try:
-            get_community_perregion(regionname)
-            logging.info(regionname + "Done")
-        except Exception as e:
-            logging.error(e)
-            logging.error(regionname + "Fail")
-            pass
+    executor = ThreadPoolExecutor(max_workers=6)
+    executor.map(loop, regionlist)
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
@@ -196,8 +200,8 @@ def get_house_percommunity(communityname, id, _page=None):
                 exact_community = position.a.get_text().strip()
                 if exact_community != communityname:
                     logging.info('expected community: ' + communityname + ' actual: ' + exact_community)
-                    continue
-                #if("小区" not in communityname and "社区" not in communityname):
+                    return
+                # if("小区" not in communityname and "社区" not in communityname):
                 #    if(exact_community != communityname):
                 #        logging.info(communityname + "search failed! please check")
                 #        continue
@@ -213,8 +217,10 @@ def get_house_percommunity(communityname, id, _page=None):
 
                 # find the latest totalprice, if the price is the same as the price we get this time, skip updating the hisprice
                 needUpdateHisPrice = True
-                maxDate = model.Hisprice.select(model.fn.MAX(model.Hisprice.date)).where(model.Hisprice.houseID == hid).scalar()
-                ret = model.Hisprice.get_or_none((model.Hisprice.houseID == hid) & (model.Hisprice.date == maxDate) & (model.Hisprice.totalPrice == totalPrice))
+                maxDate = model.Hisprice.select(model.fn.MAX(model.Hisprice.date)).where(
+                    model.Hisprice.houseID == hid).scalar()
+                ret = model.Hisprice.get_or_none((model.Hisprice.houseID == hid) & (model.Hisprice.date == maxDate) & (
+                        model.Hisprice.totalPrice == totalPrice))
 
                 if ret is not None:
                     print(ret.houseID, ' ', ret.date, ' ', ret.totalPrice, ' price not change, skipping...')
@@ -240,7 +246,7 @@ def get_house_percommunity(communityname, id, _page=None):
                 info_dict.update({u'decoration': info[3].strip()})
                 info_dict.update({u'floor': info[4].strip()})
                 info_dict.update({u'years': info[5].strip()})
-                
+
                 # not suitable to new html structure be careful
                 '''
                 housefloor = name.find("div", {"class": "flood"})
@@ -266,13 +272,13 @@ def get_house_percommunity(communityname, id, _page=None):
             # houseinfo insert into mysql
             data_source.append(info_dict)
             hisprice_data_source.append({"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-            
+
             # model.Houseinfo.insert(**info_dict).execute()
             # model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).execute()
-        
+
         try:
             with model.database.atomic():
-                model.Houseinfo.insert_many(data_source).execute()
+                model.Houseinfo.replace_many(data_source).execute()
                 model.Hisprice.insert_many(hisprice_data_source).execute()
             time.sleep(1)
         except Exception as e:
@@ -422,64 +428,80 @@ def get_community_perregion(regionname=u'xicheng'):
         row = model.Community.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
 
-    for page in range(total_pages):
+    for page in range(9999999):
         if page > 0:
             url_page = BASE_URL + u"xiaoqu/" + regionname + "/pg%d/" % page
             source_code = misc.get_source_code(url_page)
+            if str(source_code).find('人机身份认证') != -1:
+                print('需要人机验证.... page: ', (page + 1))
+                return
             soup = BeautifulSoup(source_code, 'lxml')
 
         nameList = soup.findAll("li", {"class": "clear"})
+        if nameList is None:
+            page -= 1
+            continue
+        if len(nameList) == 0:
+            break
         i = 0
         log_progress("GetCommunityByRegionlist", regionname, page + 1, total_pages)
         data_source = []
         for name in nameList:  # Per house loop
             i = i + 1
             info_dict = {}
-            try:
-                communitytitle = name.find("div", {"class": "title"})
-                title = communitytitle.get_text().strip('\n')
-                link = communitytitle.a.get('href')
-                info_dict.update({u'title': title})
-                print(title)
-                info_dict.update({u'link': link})
+            # try:
+            communitytitle = name.find("div", {"class": "title"})
+            title = communitytitle.get_text().strip('\n')
+            link = communitytitle.a.get('href')
+            info_dict.update({u'title': title})
+            print(regionname, ": ", title)
+            info_dict.update({u'link': link})
 
-                district = name.find("a", {"class": "district"})
-                info_dict.update({u'district': district.get_text()})
+            district = name.find("a", {"class": "district"})
+            info_dict.update({u'district': district.get_text()})
 
-                bizcircle = name.find("a", {"class": "bizcircle"})
-                info_dict.update({u'bizcircle': bizcircle.get_text()})
+            bizcircle = name.find("a", {"class": "bizcircle"})
+            info_dict.update({u'bizcircle': bizcircle.get_text()})
 
-                tagList = name.find("div", {"class": "tagList"})
-                info_dict.update({u'tagList': tagList.get_text().strip('\n')})
+            tagList = name.find("div", {"class": "tagList"})
+            info_dict.update({u'tagList': tagList.get_text().strip('\n')})
 
-                onsale = name.find("a", {"class": "totalSellCount"})
-                info_dict.update({u'onsale': onsale.span.get_text().strip('\n')})
+            onsale = name.find("a", {"class": "totalSellCount"})
+            info_dict.update({u'onsale': onsale.span.get_text().strip('\n')})
 
-                onrent = name.find("a", {"title": title + u"租房"})
-                info_dict.update({u'onrent': onrent.get_text().strip('\n').split(u'套')[0]})
+            onrent = name.find("a", {"title": title + u"租房"})
+            info_dict.update({u'onrent': onrent.get_text().strip('\n').split(u'套')[0]})
 
-                info_dict.update({u'id': str(name.get('data-housecode'))})
+            info_dict.update({u'id': str(name.get('data-housecode'))})
 
-                price = name.find("div", {"class": "totalPrice"})
-                info_dict.update({u'price': price.span.get_text().strip('\n')})
+            price = name.find("div", {"class": "totalPrice"})
+            info_dict.update({u'price': price.span.get_text().strip('\n')})
 
-                communityinfo = get_communityinfo_by_url(link)
-                for key, value in communityinfo.items():
-                    info_dict.update({key: value})
+            communityinfo = get_communityinfo_by_url(link)
+            for i in range(10):
+                if len(communityinfo.items()) == 0:
+                    communityinfo = get_communityinfo_by_url(link)
+                else:
+                    break
 
+            if len(communityinfo.items()) == 0:
+                print('....................tried 10 times, failed: ', title)
 
-            except Exception as e:
-                logging.error(e)
-                logging.info("page:" + page + "name:" + name + "Fail")
-                continue
+            for key, value in communityinfo.items():
+                info_dict.update({key: value})
+
+            # except Exception as e:
+            #     logging.error(e)
+            #     logging.info("page:" + str(page) + "name:" + name + "Fail")
+            #     continue
 
             try:
                 with model.database.atomic():
                     model.Community.replace_many(info_dict).execute()
-                time.sleep(1)
+                # time.sleep()
             except Exception as e:
                 logging.error(e)
-                logging.info(regionname + "page:" + page + "Fail")
+                logging.info(regionname + "page:" + str(page) + "Fail")
                 continue
 
             # communityinfo insert into mysql
@@ -819,6 +841,8 @@ def get_rent_perregion(district, _page=None):
 
 def get_communityinfo_by_url(url):
     source_code = misc.get_source_code(url)
+    if source_code is None:
+        return {}
     soup = BeautifulSoup(source_code, 'lxml')
 
     if check_block(soup):
@@ -826,6 +850,8 @@ def get_communityinfo_by_url(url):
 
     communityinfos = soup.findAll("div", {"class": "xiaoquInfoItem"})
     res = {}
+    if communityinfos is None:
+        return res
     for info in communityinfos:
         key_type = {
             u"建筑年代": u"year",
