@@ -150,5 +150,5 @@ class Rentinfo(BaseModel):
 
 def database_init():
     database.connect()
-    # database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True) 
+    database.create_tables([Community, Houseinfo, Hisprice, Sellinfo, Monthsellinfo, Rentinfo], safe=True) 
     database.close()

@@ -15,7 +15,7 @@ CITY = settings.CITY
 
 # =============================Public========================================================
 
-def GetHouseByCommunitylist(communitylist=["东菜园小区"], _page=None):
+def GetHouseByCommunitylist(communitylist, _page=None):
     logging.info("Get House Infomation")
     starttime = datetime.datetime.now()
     community_len = str(len(communitylist))
@@ -87,7 +87,7 @@ def GetRentByCommunitylist(communitylist, _page=None):
     logging.info("Run time: " + str(endtime - starttime))
 
 
-def GetCommunityByRegionlist(regionlist=[u'xicheng']):
+def GetCommunityByRegionlist(regionlist):
     logging.info("Get Community Infomation")
     starttime = datetime.datetime.now()
     regionlist_len = str(len(regionlist))
@@ -408,7 +408,7 @@ def get_sell_perhouseID(houseID):
         logging.info(houseID + "house info Fail")
 
 
-def get_community_perregion(regionname=u'xicheng'):
+def get_community_perregion(regionname):
     url = BASE_URL + u"xiaoqu/" + regionname + "/"
     print(url)
     source_code = misc.get_source_code(url)
