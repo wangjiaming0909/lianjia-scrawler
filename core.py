@@ -9,6 +9,7 @@ import time
 import datetime
 import urllib.request as urllib2
 import logging
+import sys
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 BASE_URL = u"http://%s.lianjia.com/" % (settings.CITY)
@@ -104,8 +105,10 @@ def GetCommunityByRegionlist(regionlist=[u'xicheng']):
     starttime = datetime.datetime.now()
     regionlist_len = str(len(regionlist))
     i_status = 1
-    executor = ThreadPoolExecutor(max_workers=6)
-    executor.map(loop, regionlist)
+    # executor = ThreadPoolExecutor(max_workers=6)
+    # executor.map(loop, regionlist)
+    for regionname in regionlist:
+        loop(regionname)
     endtime = datetime.datetime.now()
     logging.info("Run time: " + str(endtime - starttime))
 
@@ -430,7 +433,7 @@ def get_community_perregion(regionname=u'xicheng'):
 
     for page in range(9999999):
         if page > 0:
-            url_page = BASE_URL + u"xiaoqu/" + regionname + "/pg%d/" % page
+            url_page = BASE_URL + u"xiaoqu/" + regionname + "/pg%d" % page + 'rs'+regionname
             source_code = misc.get_source_code(url_page)
             if str(source_code).find('人机身份认证') != -1:
                 print('需要人机验证.... page: ', (page + 1))
@@ -442,6 +445,7 @@ def get_community_perregion(regionname=u'xicheng'):
             page -= 1
             continue
         if len(nameList) == 0:
+            logging.info(regionname + 'completed....')
             break
         i = 0
         log_progress("GetCommunityByRegionlist", regionname, page + 1, total_pages)
@@ -478,14 +482,17 @@ def get_community_perregion(regionname=u'xicheng'):
             info_dict.update({u'price': price.span.get_text().strip('\n')})
 
             communityinfo = get_communityinfo_by_url(link)
-            for i in range(10):
+            for i in range(3):
                 if len(communityinfo.items()) == 0:
+                    logging.info(regionname + "sleeping 3s")
+                    logging.info(link)
+                    time.sleep(3)
                     communityinfo = get_communityinfo_by_url(link)
                 else:
                     break
 
             if len(communityinfo.items()) == 0:
-                print('....................tried 10 times, failed: ', title)
+                print('....................tried 3 times, failed: ', title, ' ', district)
 
             for key, value in communityinfo.items():
                 info_dict.update({key: value})

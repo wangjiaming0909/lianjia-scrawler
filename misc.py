@@ -35,7 +35,9 @@ hd = {
 
 def get_source_code(url):
     try:
-        result = requests.get(url, headers=hds[random.randint(0,len(hds)-1)])
+        useragent = hds[random.randint(0, len(hds) - 1)]
+        # hd[useragent.keys] = useragent.values
+        result = requests.get(url, headers=hd)
         # result = requests.get(url)
         source_code = result.content
     except Exception as e:
