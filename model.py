@@ -70,6 +70,7 @@ class Houseinfo(BaseModel):
     houseID = CharField(primary_key=True)
     title = CharField()
     link = CharField()
+    imgUrl = CharField()
     communityName = CharField()
     communityID = CharField()
     years = CharField()
@@ -87,7 +88,6 @@ class Houseinfo(BaseModel):
 
 
 class Hisprice(BaseModel):
-    id = PrimaryKeyField()
     houseID = CharField()
     totalPrice = CharField()
     date = DateField(default=datetime.datetime.now().date())

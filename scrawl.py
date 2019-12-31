@@ -23,21 +23,17 @@ def get_custom_communitylist():
 if __name__ == "__main__":
     pages = settings.PAGES
     regionlist = settings.REGIONLIST  # only pinyin support
-    model.database_init()
+    # model.database_init()
 
     # core.GetHouseByRegionlist(regionlist, pages)
     # core.GetRentByRegionlist(regionlist, pages)
     
     # custom_l = get_custom_communitylist()
     #core.GetCommunityByCustomlist(custom_l)
-
-    start = time.time()
+    
     pool = Pool(processes=4)
     pool.map(core.get_community_perregion, regionlist)
-
-    end = time.time()#记录四个进程的结束时间
-
-
+    
     # core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
 
     communitylist = get_communitylist()  # Read celllist from database
