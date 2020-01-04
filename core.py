@@ -100,7 +100,7 @@ def loop(regionname):
     #     pass
 
 
-def GetCommunityByRegionlist(regionlist=[u'xicheng']):
+def GetCommunityByRegionlist(regionlist):
     logging.info("Get Community Infomation")
     starttime = datetime.datetime.now()
     regionlist_len = str(len(regionlist))
@@ -310,7 +310,9 @@ def get_sell_percommunity(communityname, _page=None):
 
     if total_pages == None:
         row = model.Sellinfo.select().count()
-        raise RuntimeError("Finish at %s because total_pages is None" % row)
+        # raise RuntimeError("Finish at %s because total_pages is None" % row)
+        logging.info(url + "total pages is None")
+        return
 
     for page in range(total_pages):
         if page > 0:
@@ -426,6 +428,8 @@ def get_community_perregion(regionname):
     url = BASE_URL + u"xiaoqu/" + regionname + "/"
     print(url)
     source_code = misc.get_source_code(url)
+    if source_code == None:
+        return
     soup = BeautifulSoup(source_code, 'lxml')
 
     if check_block(soup):
@@ -434,7 +438,8 @@ def get_community_perregion(regionname):
 
     if total_pages == None:
         row = model.Community.select().count()
-        raise RuntimeError("Finish at %s because total_pages is None" % row)
+        # raise RuntimeError("Finish at %s because total_pages is None" % row)
+        logging.info(url + "total pagesis none")
 
     for page in range(9999999):
         if page > 0:
