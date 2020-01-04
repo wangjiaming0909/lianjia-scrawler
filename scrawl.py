@@ -7,7 +7,7 @@ import settings
 
 def get_communitylist():
     res = []
-    for community in model.Community.select():
+    for community in model.Community.select(model.Community.title, model.Community.id).order_by(model.Community.id):
         res.append((community.title, community.id))
     return res
 
