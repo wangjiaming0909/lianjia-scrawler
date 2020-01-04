@@ -18,7 +18,7 @@ CITY = settings.CITY
 
 # =============================Public========================================================
 
-def GetHouseByCommunitylist(communitylist=["东菜园小区"], _page=None):
+def GetHouseByCommunitylist(communitylist, _page=None):
     logging.info("Get House Infomation")
     starttime = datetime.datetime.now()
     community_len = str(len(communitylist))
@@ -236,6 +236,9 @@ def get_house_percommunity(communityname, id, _page=None):
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
                 info_dict.update({u'link': housetitle.a.get('href')})
+                
+                imgUrl = name.find("img", {"class": "lj-lazy"})
+                info_dict.update({u'imgUrl': imgUrl.get('src')})
 
                 houseaddr = name.find("div", {"class": "address"})
                 if CITY == 'bj':
@@ -419,7 +422,7 @@ def get_sell_perhouseID(houseID):
         logging.info(houseID + "house info Fail")
 
 
-def get_community_perregion(regionname=u'xicheng'):
+def get_community_perregion(regionname):
     url = BASE_URL + u"xiaoqu/" + regionname + "/"
     print(url)
     source_code = misc.get_source_code(url)

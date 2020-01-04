@@ -70,6 +70,7 @@ class Houseinfo(BaseModel):
     houseID = CharField(primary_key=True)
     title = CharField()
     link = CharField()
+    imgUrl = CharField()
     communityName = CharField()
     communityID = CharField()
     years = CharField()
