@@ -238,7 +238,7 @@ def get_house_percommunity(communityname, id, _page=None):
                 info_dict.update({u'link': housetitle.a.get('href')})
                 
                 imgUrl = name.find("img", {"class": "lj-lazy"})
-                info_dict.update({u'imgUrl': imgUrl.get('src')})
+                info_dict.update({u'imgUrl': imgUrl.get('data-original')})
 
                 houseaddr = name.find("div", {"class": "address"})
                 if CITY == 'bj':
