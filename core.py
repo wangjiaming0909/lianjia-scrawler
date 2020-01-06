@@ -236,9 +236,21 @@ def get_house_percommunity(communityname, id, _page=None):
                 housetitle = name.find("div", {"class": "title"})
                 info_dict.update({u'title': housetitle.a.get_text().strip()})
                 info_dict.update({u'link': housetitle.a.get('href')})
-                
-                imgUrl = name.find("img", {"class": "lj-lazy"})
-                info_dict.update({u'imgUrl': imgUrl.get('data-original')})
+                try:
+                    source = misc.get_source_code(info_dict['link'])
+                    soup = BeautifulSoup(source, 'lxml')
+                    datadesc = "户型图".encode('utf8')
+                    housetypeli = soup.findAll("li", attrs={'data-desc': datadesc})
+                    attrs: dict = housetypeli[0].attrs
+                    if 'data-pic' in attrs:
+                        imgUrl = attrs['data-pic']
+                    elif 'data-src' in attrs:
+                        imgUrl = attrs['data-src']
+                except:
+                    pass
+
+                #imgUrl = name.find("img", {"class": "lj-lazy"})
+                info_dict.update({u'imgUrl': imgUrl})
 
                 houseaddr = name.find("div", {"class": "address"})
                 if CITY == 'bj':
