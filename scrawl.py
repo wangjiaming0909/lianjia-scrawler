@@ -32,18 +32,18 @@ if __name__ == "__main__":
     #core.GetCommunityByCustomlist(custom_l)
     
     pool = Pool(processes=4)
-    pool.map(core.get_community_perregion, regionlist)
+    #pool.map(core.get_community_perregion, regionlist)
     
     # core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
 
     communitylist = get_communitylist()  # Read celllist from database
-    for communityInfo in communitylist:
-        pool.apply_async(core.get_house_percommunity, args= communityInfo)
+    # for communityInfo in communitylist:
+    #     pool.apply_async(core.get_house_percommunity, args= communityInfo)
+    #
+    # pool.close()  # 关闭进程池，不再接受新的进程
+    # pool.join()  # 主进程阻塞等待子进程的退出
     
-    pool.close()  # 关闭进程池，不再接受新的进程
-    pool.join()  # 主进程阻塞等待子进程的退出
-    
-    # core.GetHouseByCommunitylist(communitylist, pages)
+    core.GetHouseByCommunitylist(communitylist, pages)
     
     #core.GetSellByCommunitylist(communitylist, pages)
 

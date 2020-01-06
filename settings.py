@@ -1,6 +1,6 @@
 DBENGINE = 'mysql' #ENGINE OPTIONS: mysql, sqlite3, postgresql
 # DBNAME = 'house'
-DBNAME = 'bj'
+DBNAME = 'house'
 DBUSER = 'root'
 DBPASSWORD = '123456'
 DBHOST = 'localhost'
