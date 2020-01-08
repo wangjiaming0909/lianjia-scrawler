@@ -32,9 +32,9 @@ if __name__ == "__main__":
     #core.GetCommunityByCustomlist(custom_l)
     
     pool = Pool(processes=4)
-    #pool.map(core.get_community_perregion, regionlist)
+    pool.map(core.get_community_perregion, regionlist)
     
-    # core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
+    core.GetCommunityByRegionlist(regionlist)  # Init,scrapy celllist and insert database; could run only 1st time
 
     communitylist = get_communitylist()  # Read celllist from database
     # for communityInfo in communitylist:

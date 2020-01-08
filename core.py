@@ -241,7 +241,7 @@ def get_house_percommunity(communityname, id, _page=None):
                     soup = BeautifulSoup(source, 'lxml')
                     datadesc = "户型图".encode('utf8')
                     housetypeli = soup.findAll("li", attrs={'data-desc': datadesc})
-                    attrs: dict = housetypeli[0].attrs
+                    attrs = housetypeli[0].attrs
                     if 'data-pic' in attrs:
                         imgUrl = attrs['data-pic']
                     elif 'data-src' in attrs:
